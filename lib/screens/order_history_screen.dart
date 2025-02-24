@@ -2,6 +2,8 @@ import 'package:ecommerce_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
+  const OrderHistoryScreen({super.key});
+
   @override
   _OrderHistoryScreenState createState() => _OrderHistoryScreenState();
 }

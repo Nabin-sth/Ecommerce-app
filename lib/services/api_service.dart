@@ -2,14 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.8:8000/api/v1';
+  static const String baseUrl = 'http://192.168.1.6:8000/api/v1';
 
   Future<Map<String, dynamic>> createPaymentIntent(
       Map<String, dynamic> data) async {
     print(data);
     final response = await http.post(
       // Uri.parse('$baseUrl/create-payment-intent'),
-      Uri.parse('http://192.168.1.8:5000/create-payment-intent'),
+      Uri.parse('http://192.168.1.6:5000/create-payment-intent'),
 
       headers: {'Content-Type': 'application/json'},
       body: json.encode(data),
@@ -55,10 +55,10 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: json.encode(cartData),
     );
-    print(response.body);
+    print("placecart Response: ${response.body}");
 
     if (response.statusCode == 201) {
-      print(response.body);
+      print("placecart Respomsme: ${response.body}");
       return json.decode(response.body);
     } else {
       throw Exception('Failed to place cart');

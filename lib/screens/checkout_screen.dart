@@ -3,60 +3,85 @@ import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
-class CheckoutScreen extends StatelessWidget {
+class CheckoutScreen extends StatefulWidget {
   final List<dynamic> cart;
   final List<dynamic> productsId;
+  final String userName;
 
-  CheckoutScreen({required this.cart,required this.productsId});
+  const CheckoutScreen({
+    super.key,
+    required this.cart,
+    required this.productsId,
+    required this.userName,
+  });
+
+  @override
+  _CheckoutScreenState createState() => _CheckoutScreenState();
+}
+
+class _CheckoutScreenState extends State<CheckoutScreen> {
+  // Mapping of cities to areas
+  final Map<String, List<String>> cityAreas = {
+    "Kathmandu": ["Thamel", "Baneshwor", "Pulchowk", "Maharajgunj", "Kalanki"],
+    "Pokhara": ["Lakeside", "New Road", "Mahendrapul", "Chipledhunga"],
+    "Chitwan": ["Bharatpur", "Narayangarh", "Ratnanagar", "Tandi"],
+    "Biratnagar": ["Main Road", "Birat Chowk", "Shankharpur", "Jatuwa"],
+  };
+
+  // Default selections
+  String selectedCity = "Kathmandu";
+  String selectedArea = "Thamel";
+
+  @override
+  void initState() {
+    super.initState();
+    selectedArea = cityAreas[selectedCity]![0]; // Default area based on city
+  }
 
   Future<void> _makePayment(BuildContext context) async {
     try {
-      final totalAmount =
-          (cart.fold<num>(0, (sum, item) => sum + (item['price'] as num)) * 100)
-              .toInt();
-      print(totalAmount);
+      final totalAmount = (widget.cart.fold<num>(
+                  0,
+                  (sum, item) =>
+                      sum +
+                      ((item['price'] as num) * (item['quantity'] as int))) *
+              100)
+          .toInt(); // Convert to cents
 
-      // Step 1: Fetch payment intent from your backend
       final response = await ApiService().createPaymentIntent({
-        'amount': totalAmount, // Amount in cents
+        'amount': totalAmount,
         'currency': 'usd',
       });
-      print("Stripe Response: $response");
 
       if (!response.containsKey('clientSecret')) {
         throw Exception('Invalid Stripe response: missing clientSecret');
       }
-      print("step1");
-      // print(cart);
-      // print(cart[0]["_id"]);
 
-      // Step 2: Initialize payment sheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: response['clientSecret'],
           merchantDisplayName: 'ECommerce App',
           billingDetails: BillingDetails(
-            email: 'customer@example.com', // Optional but recommended
+            email: 'customer@example.com',
           ),
         ),
       );
-      print("step 2");
 
-      // Step 3: Display payment sheet
       await Stripe.instance.presentPaymentSheet();
-      print("step3");
 
-      // Step 4: Place order
-      // final cartData = {
-      //   "userId": "679e36f2cb81bae5f1eb5309",
-      //   'orderItems': productsId,
-      //   'orderPrice': totalAmount,
-      // };
-      // print(cartData);
-      // await ApiService().placeOrder(cartData);
-      print("step4");
+      // Final full address
+      String fullAddress = "$selectedArea, $selectedCity";
 
-      // Show success message
+      // Include user details and selected address in the order
+      final orderData = {
+        "phone": "9844782893",
+        "customer": widget.userName,
+        "userAddress": fullAddress,
+        "orderItems": widget.productsId,
+        "totalPrice": totalAmount,
+      };
+      // await ApiService().placeOrder(orderData);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Payment successful!')),
       );
@@ -70,34 +95,110 @@ class CheckoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total =
-        cart.fold<num>(0, (sum, item) => sum + (item['price'] as num)).toInt();
+    final total = widget.cart
+        .fold<num>(
+          0,
+          (sum, item) =>
+              sum + ((item['price'] as num) * (item['quantity'] as int)),
+        )
+        .toInt(); // Total price considering quantity
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Checkout'),
       ),
-      body: ListView.builder(
-        itemCount: cart.length,
-        itemBuilder: (context, index) {
-          final product = cart[index];
-          return ListTile(
-            // leading: Image.network(
-            //   product['image'],
-            //   width: 50,
-            //   height: 50,
-            //   fit: BoxFit.cover,
-            // ),
-            leading: AvifImage.network(
-              product['productImage'],
-              height: 50,
-              width: 50,
-              fit: BoxFit.cover,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Name: ${widget.userName}',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                SizedBox(height: 8),
+
+                // City Dropdown
+                Text('Select City:',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                DropdownButton<String>(
+                  value: selectedCity,
+                  isExpanded: true,
+                  items: cityAreas.keys.map((String city) {
+                    return DropdownMenuItem<String>(
+                      value: city,
+                      child: Text(city),
+                    );
+                  }).toList(),
+                  onChanged: (String? newCity) {
+                    if (newCity != null) {
+                      setState(() {
+                        selectedCity = newCity;
+                        selectedArea = cityAreas[newCity]![0]; // Reset area
+                      });
+                    }
+                  },
+                ),
+
+                SizedBox(height: 8),
+
+                // Area Dropdown
+                Text('Select Area:',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                DropdownButton<String>(
+                  value: selectedArea,
+                  isExpanded: true,
+                  items: cityAreas[selectedCity]!.map((String area) {
+                    return DropdownMenuItem<String>(
+                      value: area,
+                      child: Text(area),
+                    );
+                  }).toList(),
+                  onChanged: (String? newArea) {
+                    if (newArea != null) {
+                      setState(() {
+                        selectedArea = newArea;
+                      });
+                    }
+                  },
+                ),
+
+                SizedBox(height: 16),
+                Text("Selected Address: $selectedArea, $selectedCity",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
             ),
-            title: Text(product['name']),
-            subtitle: Text('\$${product['price'].toString()}'),
-          );
-        },
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: widget.cart.length,
+              itemBuilder: (context, index) {
+                final product = widget.cart[index];
+                return ListTile(
+                  leading: AvifImage.network(
+                    product['productImage'],
+                    height: 50,
+                    width: 50,
+                    fit: BoxFit.cover,
+                  ),
+                  title: Text(product['name']),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('\$${product['price'].toString()}'),
+                      Text('Quantity: ${product['quantity']}',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -110,7 +211,7 @@ class CheckoutScreen extends StatelessWidget {
             ),
             SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _makePayment(context), // Pass context here
+              onPressed: () => _makePayment(context),
               child: Text('Pay Now'),
             ),
           ],

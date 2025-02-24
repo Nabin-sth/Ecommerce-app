@@ -5,6 +5,8 @@ import 'register_screen.dart'; // Import the register screen
 import 'home_screen.dart'; // Import the home screen
 
 class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,6 +37,8 @@ class LoginScreen extends StatelessWidget {
 }
 
 class LoginForm extends StatefulWidget {
+  const LoginForm({super.key});
+
   @override
   _LoginFormState createState() => _LoginFormState();
 }
@@ -47,7 +51,7 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       final response = await http.post(
-        Uri.parse('http://192.168.1.8:8000/api/v1/user/login'),
+        Uri.parse('http://192.168.1.7:8000/api/v1/user/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,
@@ -64,7 +68,9 @@ class _LoginFormState extends State<LoginForm> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen(),
+            builder: (context) => HomeScreen(
+              userId: userId,
+            ),
           ),
         );
       } else {

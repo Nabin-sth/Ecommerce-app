@@ -1,6 +1,8 @@
+import 'package:ecommerce_app/screens/home_screen.dart';
 import 'package:ecommerce_app/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+// import "login_screen.dart"
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +12,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,7 +21,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginScreen(),
+      home: LoginScreen(
+        // userId: '679e36f2cb81bae5f1eb5309',
+        // 679e36f2cb81bae5f1eb5309
+      ),
     );
   }
 }
