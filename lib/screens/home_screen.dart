@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:ecommerce_app/services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String userId;
+  final String? userId;
 
-  const HomeScreen({super.key, required this.userId});
+  const HomeScreen({super.key, this.userId});
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (context) => CartScreen(
                       cart: cart,
                       productsId: productsId,
-                      userId: widget.userId,
+                      userId: widget.userId!,
                       quantity: quantity,
                     ),
                   ),

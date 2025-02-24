@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/screens/home_screen.dart';
 import 'package:ecommerce_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
@@ -84,6 +85,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Payment successful!')),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } catch (e) {
       print('Payment failed: $e');

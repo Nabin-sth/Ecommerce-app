@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.6:8000/api/v1';
+  // static const String baseUrl = 'http://192.168.1.6:8000/api/v1';
+  static const String baseUrl = 'https://ecommerce-production-2acf.up.railway.app/api/v1';
 
   Future<Map<String, dynamic>> createPaymentIntent(
       Map<String, dynamic> data) async {

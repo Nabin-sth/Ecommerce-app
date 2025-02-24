@@ -51,7 +51,8 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       final response = await http.post(
-        Uri.parse('http://192.168.1.7:8000/api/v1/user/login'),
+        Uri.parse(
+            'https://ecommerce-production-2acf.up.railway.app/api/v1/user/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,
